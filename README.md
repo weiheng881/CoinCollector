@@ -46,4 +46,4 @@ No installation or server setup is required.
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/YOUR-USERNAME/YOUR-REPOSITORY-NAME.git](https://github.com/YOUR-USERNAME/YOUR-REPOSITORY-NAME.git)
+   git clone [https://github.com/weiheng881/CoinCollector.git](https://github.com/weiheng881/CoinCollector.git)
