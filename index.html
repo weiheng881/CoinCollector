@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Game</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    canvas {
+      background: #222;
+      display: block;
+      margin: 20px auto;
+      border: 2px solid white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>🎮 Collect Coins & Avoid Enemy</h2>
+  <p>Move: Arrow Keys | Goal: Collect all coins</p>
+  <div id="ui">Coins: 0 / 3</div>
+  <canvas id="game" width="600" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const ui = document.getElementById("ui");
+
+    // player
+    let player = {
+      x: 50,
+      y: 50,
+      size: 20,
+      speed: 4
+    };
+
+    // enemy
+    let enemy = {
+      x: 500,
+      y: 300,
+      size: 25,
+      speed: 2
+    };
+
+    // coins
+    let coins = [
+      { x: 200, y: 100, size: 10, collected: false },
+      { x: 400, y: 200, size: 10, collected: false },
+      { x: 150, y: 300, size: 10, collected: false }
+    ];
+
+    let keys = {};
+    let gameOver = false;
+    let win = false;
+
+    document.addEventListener("keydown", e => keys[e.key] = true);
+    document.addEventListener("keyup", e => keys[e.key] = false);
+
+    function movePlayer() {
+      if (keys["ArrowUp"]) player.y -= player.speed;
+      if (keys["ArrowDown"]) player.y += player.speed;
+      if (keys["ArrowLeft"]) player.x -= player.speed;
+      if (keys["ArrowRight"]) player.x += player.speed;
+    }
+
+    function moveEnemy() {
+      let dx = player.x - enemy.x;
+      let dy = player.y - enemy.y;
+      let dist = Math.sqrt(dx * dx + dy * dy);
+
+      enemy.x += (dx / dist) * enemy.speed;
+      enemy.y += (dy / dist) * enemy.speed;
+    }
+
+    function checkCollision(a, b) {
+      return (
+        a.x < b.x + b.size &&
+        a.x + a.size > b.x &&
+        a.y < b.y + b.size &&
+        a.y + a.size > b.y
+      );
+    }
+
+    function update() {
+      if (gameOver || win) return;
+
+      movePlayer();
+      moveEnemy();
+
+      // coin collection
+      coins.forEach(c => {
+        if (!c.collected && checkCollision(player, c)) {
+          c.collected = true;
+        }
+      });
+
+      // enemy collision = lose
+      if (checkCollision(player, enemy)) {
+        gameOver = true;
+      }
+
+      // win check
+      if (coins.every(c => c.collected)) {
+        win = true;
+      }
+
+      updateUI();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // player
+      ctx.fillStyle = "blue";
+      ctx.fillRect(player.x, player.y, player.size, player.size);
+
+      // enemy
+      ctx.fillStyle = "red";
+      ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
+
+      // coins
+      ctx.fillStyle = "gold";
+      coins.forEach(c => {
+        if (!c.collected) {
+          ctx.fillRect(c.x, c.y, c.size, c.size);
+        }
+      });
+
+      // text
+      ctx.fillStyle = "white";
+      ctx.font = "20px Arial";
+
+      if (gameOver) {
+        ctx.fillText("💀 Game Over!", 220, 200);
+      }
+
+      if (win) {
+        ctx.fillText("🎉 You Win!", 240, 200);
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    function updateUI() {
+      let collected = coins.filter(c => c.collected).length;
+      ui.innerHTML = `Coins: ${collected} / ${coins.length}`;
+    }
+
+    loop();
+  </script>
+
+</body>
+
+</html>
